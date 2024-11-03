@@ -18,3 +18,18 @@ enum Role {
   ADMIN
   USER
 }
+
+model Categories {
+  id    Int     @id @default(autoincrement())
+  name  String
+  news  News[]  @relation("CategoryNews") // Menambahkan relasi dengan model News
+}
+
+model News {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  createdAt   DateTime  @default(now())
+  categoryId  Int       // Menambahkan foreign key
+  category    Categories @relation("CategoryNews", fields: [categoryId], references: [id]) // Menentukan relasi ke Categories
+}
