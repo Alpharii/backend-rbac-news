@@ -15,9 +15,10 @@ router.route('/news').get((getAllNews)).post((postNews))
 router.route('/categories').get((getAllCategories)).post((postCategory))
 
 // Endpoint yang memerlukan peran ADMIN
-router.route('/admin').get(( requireRole(['ADMIN']), (req, res) => {
-    res.json({ message: 'Welcome Admin' });
-  }));
+router.route('/admin').get(requireRole(['ADMIN']), (req, res) => {
+  res.json({ message: 'Welcome Admin' });
+});
+
 
 
 // router.route('/admin-only').get(authorizeRole('ADMIN') ,async (req, res) => {

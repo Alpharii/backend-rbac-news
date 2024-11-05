@@ -1,21 +1,25 @@
-import { Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import jwt from 'jwt-simple';
 
-export const requireRole = (roles: string[]) => {
-    return (req: any, res: Response, next: NextFunction) => {
-    const token = req.headers['authorization'];
-    if (!token) return res.status(403).json({ error: 'No token provided' });
+interface RequestWithUser extends Request {
+    user?: any;
+}
 
-    try {
-        const decoded = jwt.decode(token, process.env.JWT_SECRET || 'your_secret_key');
-        if (roles.includes(decoded.role)) {
-        req.user = decoded;
-        next();
-        } else {
-        res.status(403).json({ error: 'Access denied' });
+export const requireRole = (roles: string[]) => {
+    return (req: RequestWithUser, res: Response, next: NextFunction): void => {
+        const token = req.headers['authorization'];
+        if (!token) return res.status(403).json({ error: 'No token provided' }) as unknown as void;
+
+        try {
+            const decoded = jwt.decode(token, process.env.JWT_SECRET || 'your_secret_key');
+            if (roles.includes(decoded.role)) {
+                req.user = decoded;
+                return next();
+            } else {
+                return res.status(403).json({ error: 'Access denied' }) as unknown as void;
+            }
+        } catch (err) {
+            return res.status(403).json({ error: 'Invalid token' }) as unknown as void;
         }
-    } catch (err) {
-        res.status(403).json({ error: 'Invalid token' });
-    }
     };
 };
