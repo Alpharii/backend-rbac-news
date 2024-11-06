@@ -9,7 +9,7 @@ const getAllCategories = asyncWrapper(async (req, res) => {
 });
 
 const postCategory = asyncWrapper(async (req, res) => {
-    const { name, description, categoryId } = req.body; // Destructure categoryId from request body
+    const { name } = req.body; // Destructure categoryId from request body
     const news = await prisma.categories.create({
         data: {
             name,
@@ -18,5 +18,18 @@ const postCategory = asyncWrapper(async (req, res) => {
     res.status(200).json({ data: news, message: 'success' });
 });
 
+const editCategory = asyncWrapper(async (req, res) => {
+    const { name, categoryId } = req.body; // Destructure categoryId from request body
+    const news = await prisma.categories.update({
+        where: {
+            id: categoryId
+        },
+        data: {
+            name
+        }
+    });
+    res.status(200).json({ data: news, message: 'success' });
+});
 
-export { getAllCategories, postCategory };
+
+export { getAllCategories, postCategory, editCategory };
