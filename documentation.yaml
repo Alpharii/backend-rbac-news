@@ -1,0 +1,513 @@
+openapi: 3.0.0
+info:
+  title: API Documentation
+  description: API for managing news, categories, and users.
+  version: 1.0.0
+paths:
+  /user:
+    get:
+      summary: Get all users
+      description: Retrieves the list of all users from the database.
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Successfully fetched the list of users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: User ID
+                        username:
+                          type: string
+                          description: User's username
+                        email:
+                          type: string
+                          description: User's email address
+                        createdAt:
+                          type: string
+                          format: date-time
+                          description: User creation timestamp
+                        updatedAt:
+                          type: string
+                          format: date-time
+                          description: User last update timestamp
+        '500':
+          description: Error occurred while fetching user data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+  /register:
+    post:
+      summary: Register a new user
+      description: Registers a new user in the system by providing an email, password, and role.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: The user's email address.
+                password:
+                  type: string
+                  description: The user's password.
+                role:
+                  type: string
+                  description: The role of the user (e.g., ADMIN, USER).
+      responses:
+        '201':
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: The unique ID of the newly created user.
+                  email:
+                    type: string
+                    description: The email address of the newly created user.
+                  role:
+                    type: string
+                    description: The role of the newly created user.
+        '400':
+          description: Bad request, e.g., user already exists or invalid data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "User already exists"
+  /login:
+    post:
+      summary: Log into the system
+      description: Allows users to log in with their email and password and receive a JWT token.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: The user's email address.
+                password:
+                  type: string
+                  description: The user's password.
+      responses:
+        '200':
+          description: Login successful, returns JWT token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT token to be used for authentication in subsequent requests.
+        '401':
+          description: Invalid credentials, user not found or password mismatch
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid credentials"
+  /logout:
+    delete:
+      summary: Log out of the system
+      description: Ends the user session and invalidates the JWT token.
+      tags:
+        - Auth
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "success"
+                    
+  /news:
+    get:
+      summary: Get all news
+      description: Retrieve a list of all news with basic details including ID, name, and category ID.
+      tags:
+        - News
+      responses:
+        '200':
+          description: Successfully retrieved news list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        categoryId:
+                          type: integer
+                  message:
+                    type: string
+                    example: 'success'
+        '500':
+          description: Internal server error
+    post:
+      summary: Create a new news article
+      description: Allows an admin to create a new news article by providing a name, description, and category ID.
+      tags:
+        - News
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the news article.
+                description:
+                  type: string
+                  description: A detailed description of the news article.
+                categoryId:
+                  type: integer
+                  description: The ID of the category to which the news article belongs.
+      responses:
+        '200':
+          description: Successfully created news article
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      description:
+                        type: string
+                      categoryId:
+                        type: integer
+                  message:
+                    type: string
+                    example: "succes"
+        '401':
+          description: Unauthorized, only accessible by Admin
+        '400':
+          description: Bad request, missing or invalid data
+  /news/{id}:
+    patch:
+      summary: Edit an existing news article
+      description: Allows an admin to edit an existing news article by specifying the article ID and providing updated details.
+      tags:
+        - News
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: The ID of the news article to update
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The updated name of the news article.
+                description:
+                  type: string
+                  description: The updated description of the news article.
+                categoryId:
+                  type: integer
+                  description: The updated category ID of the news article.
+      responses:
+        '200':
+          description: Successfully updated the news article
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      description:
+                        type: string
+                      categoryId:
+                        type: integer
+                  message:
+                    type: string
+                    example: 'success'
+        '400':
+          description: Bad request, invalid data
+        '401':
+          description: Unauthorized, only accessible by Admin
+        '404':
+          description: News article not found
+    get:
+      summary: Get details of a specific news article
+      description: Retrieve detailed information of a specific news article by ID.
+      tags:
+        - News
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: The ID of the news article to fetch
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successfully retrieved the news article
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      description:
+                        type: string
+                      categoryId:
+                        type: integer
+                  message:
+                    type: string
+                    example: 'success'
+        '404':
+          description: News article not found
+  /news/search:
+    get:
+      summary: Search for news articles
+      description: Allows searching for news articles based on name or description. Case-insensitive search is supported.
+      tags:
+        - News
+      parameters:
+        - in: query
+          name: query
+          required: true
+          description: The search query string to find matching news articles.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        categoryId:
+                          type: integer
+                  message:
+                    type: string
+                    example: 'success'
+        '400':
+          description: Bad request, query parameter is required
+        '404':
+          description: No news articles found matching the query
+          
+  /categories:
+    get:
+      summary: Get all categories
+      operationId: getAllCategories
+      tags:
+        - Categories
+      responses:
+        '200':
+          description: Successfully retrieved all categories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                  message:
+                    type: string
+                example:
+                  data:
+                    - id: 1
+                      name: "Category 1"
+                  message: "success"
+    post:
+      summary: Create new category
+      operationId: postCategory
+      tags:
+        - Categories
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              required:
+                - name
+      responses:
+        '200':
+          description: Category created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                  message:
+                    type: string
+                example:
+                  data:
+                    id: 2
+                    name: "New Category"
+                  message: "success"
+        '403':
+          description: Forbidden, user does not have permission (only ADMIN role allowed)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                example:
+                  error: "Access denied"
+    patch:
+      summary: Edit an existing category
+      operationId: editCategory
+      tags:
+        - Categories
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                categoryId:
+                  type: integer
+              required:
+                - name
+                - categoryId
+      responses:
+        '200':
+          description: Category updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                  message:
+                    type: string
+                example:
+                  data:
+                    id: 1
+                    name: "Updated Category"
+                  message: "success"
+        '403':
+          description: Forbidden, user does not have permission (only ADMIN role allowed)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                example:
+                  error: "Access denied"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
