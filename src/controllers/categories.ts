@@ -1,7 +1,5 @@
 import asyncWrapper from "../middleware/asyncWrapper";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../config/prisma";
 
 const getAllCategories = asyncWrapper(async (req, res) => {
     const news = await prisma.categories.findMany();
@@ -30,6 +28,5 @@ const editCategory = asyncWrapper(async (req, res) => {
     });
     res.status(200).json({ data: news, message: 'success' });
 });
-
 
 export { getAllCategories, postCategory, editCategory };

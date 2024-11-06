@@ -10,5 +10,4 @@ const asyncWrapper = (fn: (req: Request, res: Response, next: Function) => Promi
     };
 };
 
-
 export default asyncWrapper;

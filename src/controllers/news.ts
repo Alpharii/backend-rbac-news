@@ -1,10 +1,14 @@
 import asyncWrapper from "../middleware/asyncWrapper";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../config/prisma";
 
 const getAllNews = asyncWrapper(async (req, res) => {
-    const news = await prisma.news.findMany();
+    const news = await prisma.news.findMany({
+        select: {
+            id: true,
+            name: true,
+            categoryId: true
+        }
+    });
     res.status(200).json({ data: news, message: 'success' });
 });
 
@@ -43,7 +47,6 @@ const editNews = asyncWrapper(async (req, res) => {
     res.status(200).json({ data: news, message: 'success' });
 });
 
-
 const searchNews = asyncWrapper(async (req, res) => {
     const query = req.query.query as string;
 
@@ -53,7 +56,7 @@ const searchNews = asyncWrapper(async (req, res) => {
     }
 
     const news = await prisma.news.findMany({
-        where: {
+        where: { 
             OR: [
                 { name: { contains: query, mode: 'insensitive' } },
                 { description: { contains: query, mode: 'insensitive' } }
@@ -64,7 +67,12 @@ const searchNews = asyncWrapper(async (req, res) => {
     res.status(200).json({ data: news, message: 'success' });
 });
 
-const getNewsDetail = 0
-
+const getNewsDetail = asyncWrapper(async (req, res) => {
+    const news = await prisma.news.findUnique({
+        where: { id: parseInt(req.params.id, 10) }
+    });
+    if (!news) res.status(404).json({ error: 'News not found' });
+    res.status(200).json({ data: news, message: 'success' });
+});
 
 export { getAllNews, postNews, editNews, getNewsDetail, searchNews };
